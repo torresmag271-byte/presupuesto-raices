@@ -1623,13 +1623,13 @@ async function createPDF() {
 
     const logoPowerhouse =
       await loadImageAsDataURL(
-        "img/logo-powerhouse.png"
+        "img/logo-powerhouse.PNG"
       );
 
 
     const logoRaices =
       await loadImageAsDataURL(
-        "img/logo-raices.png"
+        "img/logo-raices.PNG"
       );
 
 
