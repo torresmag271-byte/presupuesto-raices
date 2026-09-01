@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>RAICES 8 PWH</title>
+
+    <link rel="stylesheet" href="css/styles.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script defer src="js/app.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header class="main-header">
+
+        <div class="brand">
+            <span class="brand-raices">RAICES 8</span>
+            <span class="brand-pwh">PWH</span>
+            <span class="brand-heart">♡</span>
+        </div>
+
+        <p class="subtitle">
+            Aplicación práctica: Mi Presupuesto
+        </p>
+
+    </header>
+
+
+    <section class="card personal-data">
+
+        <div class="field">
+            <label for="nombre">Nombre</label>
+
+            <input
+                type="text"
+                id="nombre"
+                placeholder="Escribí tu nombre"
+            >
+        </div>
+
+
+        <div class="field">
+            <label for="mes">Mes</label>
+
+            <input
+                type="month"
+                id="mes"
+            >
+        </div>
+
+    </section>
+
+
+    <section class="card">
+
+        <h2>Ingresos</h2>
+
+        <div class="field">
+            <label>Sueldo</label>
+            <input type="text" class="money ingreso">
+        </div>
+
+        <div class="field">
+            <label>Ayuda familiar</label>
+            <input type="text" class="money ingreso">
+        </div>
+
+        <div class="field">
+            <label>Beca</label>
+            <input type="text" class="money ingreso">
+        </div>
+
+        <div class="field">
+            <label>Otros ingresos</label>
+            <input type="text" class="money ingreso">
+        </div>
+
+
+        <div class="checkbox">
+
+            <input
+                type="checkbox"
+                id="diezmo"
+            >
+
+            <label for="diezmo">
+                Deseo separar el diezmo (10%)
+            </label>
+
+        </div>
+
+
+        <div class="resume income-summary">
+
+            <div class="summary-line">
+                <span>Total de ingresos</span>
+                <strong id="subtotalIngresos">$ 0</strong>
+            </div>
+
+
+            <div
+                class="summary-line tithe-line"
+                id="titheLine"
+                style="display:none;"
+            >
+                <span>Diezmo (10%)</span>
+                <strong id="totalDiezmo">- $ 0</strong>
+            </div>
+
+
+            <div class="summary-line total-line">
+                <span>Ingresos disponibles</span>
+                <strong id="totalIngresos">$ 0</strong>
+            </div>
+
+        </div>
+
+
+        <button
+            id="clearIncome"
+            class="clear-button"
+        >
+            Limpiar ingresos
+        </button>
+
+    </section>
+
+
+    <section class="card">
+
+        <h2>Egresos</h2>
+
+        <div id="expenses"></div>
+
+
+        <div class="resume">
+            <span>Total egresos</span>
+            <strong id="totalEgresos">$ 0</strong>
+        </div>
+
+
+        <button
+            id="clearExpenses"
+            class="clear-button"
+        >
+            Limpiar egresos
+        </button>
+
+    </section>
+
+
+    <section class="card result">
+
+        <h2>Resultado</h2>
+
+        <div class="balance">
+            <span id="saldoLabel">Saldo</span>
+            <strong id="saldo">$ 0</strong>
+        </div>
+
+    </section>
+
+
+    <section class="card">
+
+        <h2>Reflexionemos</h2>
+
+        <div id="questions">
+            <p>
+                Completá tus ingresos y egresos para comenzar.
+            </p>
+        </div>
+
+    </section>
+
+
+    <section class="card">
+
+        <h2>Mi compromiso</h2>
+
+        <textarea
+            id="compromiso"
+            placeholder="¿Qué paso concreto voy a dar este mes?"
+            rows="6"></textarea>
+
+    </section>
+
+
+    <section class="download-section">
+
+        <button
+            id="downloadBudget"
+            class="download-button"
+        >
+            Descargar presupuesto
+        </button>
+
+    </section>
+
+
+    <footer>
+        <img src="img/logo-powerhouse.png">
+        <img src="img/logo-raices.png">
+    </footer>
+
+</div>
+
+</body>
+
+</html>
