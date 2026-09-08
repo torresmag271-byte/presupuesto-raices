@@ -32,6 +32,8 @@
     </header>
 
 
+    <!-- DATOS PERSONALES -->
+
     <section class="card personal-data">
 
         <div class="field">
@@ -57,12 +59,19 @@
     </section>
 
 
+    <!-- INGRESOS -->
+
     <section class="card">
 
         <h2>Ingresos</h2>
 
         <div class="field">
-            <label>Sueldo</label>
+            <label>Ingreso fijo</label>
+            <input type="text" class="money ingreso">
+        </div>
+
+        <div class="field">
+            <label>Ingreso variable</label>
             <input type="text" class="money ingreso">
         </div>
 
@@ -132,14 +141,47 @@
     </section>
 
 
+    <!-- EGRESOS FIJOS -->
+
     <section class="card">
 
-        <h2>Egresos</h2>
+        <h2>Egresos fijos</h2>
 
-        <div id="expenses"></div>
+        <p class="section-description">
+            Gastos que suelen repetirse o estar comprometidos cada mes.
+        </p>
+
+        <div id="fixedExpenses"></div>
 
 
         <div class="resume">
+            <span>Total egresos fijos</span>
+            <strong id="totalFijos">$ 0</strong>
+        </div>
+
+    </section>
+
+
+    <!-- EGRESOS VARIABLES -->
+
+    <section class="card">
+
+        <h2>Egresos variables</h2>
+
+        <p class="section-description">
+            Gastos que pueden cambiar de un mes a otro.
+        </p>
+
+        <div id="variableExpenses"></div>
+
+
+        <div class="resume">
+            <span>Total egresos variables</span>
+            <strong id="totalVariables">$ 0</strong>
+        </div>
+
+
+        <div class="resume total-expenses-summary">
             <span>Total egresos</span>
             <strong id="totalEgresos">$ 0</strong>
         </div>
@@ -155,17 +197,69 @@
     </section>
 
 
+    <!-- RESULTADO ANTES DEL AHORRO -->
+
     <section class="card result">
 
-        <h2>Resultado</h2>
+        <h2>Resultado del mes</h2>
+
+        <p class="section-description">
+            Lo que queda después de cubrir tus egresos.
+        </p>
 
         <div class="balance">
-            <span id="saldoLabel">Saldo</span>
+            <span id="resultadoMesLabel">Resultado del mes</span>
+            <strong id="resultadoMes">$ 0</strong>
+        </div>
+
+    </section>
+
+
+    <!-- AHORRO -->
+
+    <section class="card savings-card">
+
+        <h2>Ahorro / Fondo de emergencia</h2>
+
+        <p class="section-description">
+            Separar antes de gastar.
+        </p>
+
+        <div class="field">
+            <label for="ahorro">
+                ¿Cuánto querés separar este mes?
+            </label>
+
+            <input
+                type="text"
+                id="ahorro"
+                class="money"
+                placeholder="$ 0"
+            >
+        </div>
+
+    </section>
+
+
+    <!-- SALDO FINAL -->
+
+    <section class="card result final-result">
+
+        <h2>Saldo disponible final</h2>
+
+        <p class="section-description">
+            Lo que queda disponible después de separar tu ahorro.
+        </p>
+
+        <div class="balance">
+            <span id="saldoLabel">Saldo disponible</span>
             <strong id="saldo">$ 0</strong>
         </div>
 
     </section>
 
+
+    <!-- REFLEXIÓN -->
 
     <section class="card">
 
@@ -180,6 +274,8 @@
     </section>
 
 
+    <!-- COMPROMISO -->
+
     <section class="card">
 
         <h2>Mi compromiso</h2>
@@ -192,6 +288,8 @@
     </section>
 
 
+    <!-- DESCARGAR PDF -->
+
     <section class="download-section">
 
         <button
@@ -203,6 +301,8 @@
 
     </section>
 
+
+    <!-- LOGOS -->
 
     <footer>
         <img src="img/logo-powerhouse.PNG">
