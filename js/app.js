@@ -1,20 +1,38 @@
-const expenseCategories = [
+// ======================================================
+// RAICES 8 PWH - MI PRESUPUESTO
+// ======================================================
+
+
+// ------------------------------------------------------
+// CATEGORÍAS
+// ------------------------------------------------------
+
+const fixedExpenseCategories = [
   "Vivienda",
-  "Comida",
-  "Transporte",
   "Educación",
   "Deportes",
   "Medicina privada",
   "Cuotas de tarjeta de crédito",
-  "Streaming",
+  "Streaming"
+];
+
+const variableExpenseCategories = [
+  "Comida",
+  "Transporte",
   "Salidas",
-  "Ahorro / Fondo de emergencia",
   "Otros"
 ];
 
 
-const expensesContainer =
-  document.getElementById("expenses");
+// ------------------------------------------------------
+// ELEMENTOS HTML
+// ------------------------------------------------------
+
+const fixedExpensesContainer =
+  document.getElementById("fixedExpenses");
+
+const variableExpensesContainer =
+  document.getElementById("variableExpenses");
 
 const incomeInputs =
   document.querySelectorAll(".ingreso");
@@ -25,7 +43,6 @@ const titheCheckbox =
 const titheLine =
   document.getElementById("titheLine");
 
-
 const subtotalIngresosEl =
   document.getElementById("subtotalIngresos");
 
@@ -35,9 +52,23 @@ const totalDiezmoEl =
 const totalIngresosEl =
   document.getElementById("totalIngresos");
 
+const totalFijosEl =
+  document.getElementById("totalFijos");
+
+const totalVariablesEl =
+  document.getElementById("totalVariables");
+
 const totalEgresosEl =
   document.getElementById("totalEgresos");
 
+const resultadoMesEl =
+  document.getElementById("resultadoMes");
+
+const resultadoMesLabelEl =
+  document.getElementById("resultadoMesLabel");
+
+const ahorroInput =
+  document.getElementById("ahorro");
 
 const saldoEl =
   document.getElementById("saldo");
@@ -45,10 +76,8 @@ const saldoEl =
 const saldoLabelEl =
   document.getElementById("saldoLabel");
 
-
 const questionsEl =
   document.getElementById("questions");
-
 
 const clearIncomeButton =
   document.getElementById("clearIncome");
@@ -58,7 +87,6 @@ const clearExpensesButton =
 
 const downloadBudgetButton =
   document.getElementById("downloadBudget");
-
 
 const nombreInput =
   document.getElementById("nombre");
@@ -70,6 +98,9 @@ const compromisoInput =
   document.getElementById("compromiso");
 
 
+// ------------------------------------------------------
+// FORMATO DE DINERO
+// ------------------------------------------------------
 
 function formatMoney(value) {
 
@@ -82,7 +113,6 @@ function formatMoney(value) {
 }
 
 
-
 function parseMoney(value) {
 
   return Number(
@@ -92,21 +122,17 @@ function parseMoney(value) {
 }
 
 
-
 function formatInput(input) {
 
   const rawValue =
     input.value.replace(/\D/g, "");
 
-
   if (!rawValue) {
 
     input.value = "";
-
     return;
 
   }
-
 
   input.value =
     new Intl.NumberFormat("es-AR")
@@ -115,91 +141,110 @@ function formatInput(input) {
 }
 
 
+// ------------------------------------------------------
+// CREAR FILAS DE EGRESOS
+// ------------------------------------------------------
 
-function createExpenses() {
+function createExpenseRow(category, type) {
 
-  expenseCategories.forEach((category) => {
+  const row =
+    document.createElement("div");
 
-    const row =
-      document.createElement("div");
+  row.className =
+    `expense-row ${type}-expense`;
 
+  row.dataset.category =
+    category;
 
-    row.className =
-      "expense-row";
+  row.dataset.type =
+    type;
 
+  row.innerHTML = `
 
-    const note =
-      category === "Ahorro / Fondo de emergencia"
-        ? `
-          <div style="
-            font-size:12px;
-            color:#888;
-            margin-top:3px;
-          ">
-            Separar antes de gastar
-          </div>
-        `
-        : "";
+    <div class="expense-top">
 
-
-    row.innerHTML = `
-
-      <div class="expense-top">
-
-        <div>
-
-          <label>
-            ${category}
-          </label>
-
-          ${note}
-
-        </div>
-
-
-        <input
-          type="text"
-          class="money expense-input"
-          placeholder="$ 0"
-        >
-
+      <div>
+        <label>
+          ${category}
+        </label>
       </div>
 
+      <input
+        type="text"
+        class="money expense-input"
+        placeholder="$ 0"
+      >
 
-      <div class="expense-progress">
+    </div>
 
-        <div class="expense-bar">
-          <div class="expense-fill"></div>
-        </div>
 
-        <span class="expense-percentage">
-          0%
-        </span>
+    <div class="expense-progress">
 
+      <div class="expense-bar">
+        <div class="expense-fill"></div>
       </div>
 
-    `;
+      <span class="expense-percentage">
+        0%
+      </span>
 
+    </div>
 
-    expensesContainer.appendChild(row);
+  `;
 
-  });
+  return row;
 
 }
 
 
+function createExpenses() {
+
+  fixedExpenseCategories.forEach(
+    category => {
+
+      fixedExpensesContainer.appendChild(
+        createExpenseRow(
+          category,
+          "fixed"
+        )
+      );
+
+    }
+  );
+
+
+  variableExpenseCategories.forEach(
+    category => {
+
+      variableExpensesContainer.appendChild(
+        createExpenseRow(
+          category,
+          "variable"
+        )
+      );
+
+    }
+  );
+
+}
+
+
+// ------------------------------------------------------
+// OBTENER DATOS DEL PRESUPUESTO
+// ------------------------------------------------------
 
 function getBudgetData() {
 
   let grossIncome = 0;
 
+  incomeInputs.forEach(
+    input => {
 
-  incomeInputs.forEach((input) => {
+      grossIncome +=
+        parseMoney(input.value);
 
-    grossIncome +=
-      parseMoney(input.value);
-
-  });
+    }
+  );
 
 
   const tithe =
@@ -212,51 +257,98 @@ function getBudgetData() {
     grossIncome - tithe;
 
 
-  let totalExpenses = 0;
+  let totalFixedExpenses = 0;
+  let totalVariableExpenses = 0;
 
-  const expenses = [];
-
-
-  const rows =
-    document.querySelectorAll(".expense-row");
+  const fixedExpenses = [];
+  const variableExpenses = [];
 
 
-  rows.forEach((row, index) => {
+  document
+    .querySelectorAll(".fixed-expense")
+    .forEach(row => {
 
-    const input =
-      row.querySelector(".expense-input");
+      const input =
+        row.querySelector(".expense-input");
 
+      const amount =
+        parseMoney(input.value);
 
-    const amount =
-      parseMoney(input.value);
+      totalFixedExpenses +=
+        amount;
 
+      const percentage =
+        netIncome > 0
+          ? Math.round(
+              (amount / netIncome) * 100
+            )
+          : 0;
 
-    totalExpenses += amount;
+      fixedExpenses.push({
 
+        category:
+          row.dataset.category,
 
-    const percentage =
-      netIncome > 0
-        ? Math.round(
-            (amount / netIncome) * 100
-          )
-        : 0;
+        amount,
+        percentage
 
-
-    expenses.push({
-
-      category:
-        expenseCategories[index],
-
-      amount,
-      percentage
+      });
 
     });
 
-  });
+
+  document
+    .querySelectorAll(".variable-expense")
+    .forEach(row => {
+
+      const input =
+        row.querySelector(".expense-input");
+
+      const amount =
+        parseMoney(input.value);
+
+      totalVariableExpenses +=
+        amount;
+
+      const percentage =
+        netIncome > 0
+          ? Math.round(
+              (amount / netIncome) * 100
+            )
+          : 0;
+
+      variableExpenses.push({
+
+        category:
+          row.dataset.category,
+
+        amount,
+        percentage
+
+      });
+
+    });
 
 
-  const balance =
-    netIncome - totalExpenses;
+  const totalExpenses =
+    totalFixedExpenses +
+    totalVariableExpenses;
+
+
+  const monthlyResult =
+    netIncome -
+    totalExpenses;
+
+
+  const savings =
+    parseMoney(
+      ahorroInput.value
+    );
+
+
+  const finalBalance =
+    monthlyResult -
+    savings;
 
 
   return {
@@ -264,15 +356,68 @@ function getBudgetData() {
     grossIncome,
     tithe,
     netIncome,
+
+    totalFixedExpenses,
+    totalVariableExpenses,
     totalExpenses,
-    balance,
-    expenses
+
+    fixedExpenses,
+    variableExpenses,
+
+    monthlyResult,
+    savings,
+    finalBalance
 
   };
 
 }
 
 
+// ------------------------------------------------------
+// ACTUALIZAR BARRAS
+// ------------------------------------------------------
+
+function updateExpenseBars(
+  selector,
+  expenses
+) {
+
+  document
+    .querySelectorAll(selector)
+    .forEach(
+      (row, index) => {
+
+        const percentage =
+          expenses[index].percentage;
+
+        const fill =
+          row.querySelector(
+            ".expense-fill"
+          );
+
+        const percentageEl =
+          row.querySelector(
+            ".expense-percentage"
+          );
+
+        percentageEl.textContent =
+          `${percentage}%`;
+
+        fill.style.width =
+          `${Math.min(
+            percentage,
+            100
+          )}%`;
+
+      }
+    );
+
+}
+
+
+// ------------------------------------------------------
+// CALCULAR PRESUPUESTO
+// ------------------------------------------------------
 
 function calculate() {
 
@@ -280,77 +425,113 @@ function calculate() {
     getBudgetData();
 
 
-  const rows =
-    document.querySelectorAll(".expense-row");
+  updateExpenseBars(
+    ".fixed-expense",
+    data.fixedExpenses
+  );
 
 
-  rows.forEach((row, index) => {
-
-    const percentage =
-      data.expenses[index].percentage;
-
-
-    const fill =
-      row.querySelector(".expense-fill");
-
-
-    const percentageEl =
-      row.querySelector(".expense-percentage");
-
-
-    percentageEl.textContent =
-      `${percentage}%`;
-
-
-    fill.style.width =
-      `${Math.min(percentage, 100)}%`;
-
-  });
+  updateExpenseBars(
+    ".variable-expense",
+    data.variableExpenses
+  );
 
 
   subtotalIngresosEl.textContent =
-    formatMoney(data.grossIncome);
+    formatMoney(
+      data.grossIncome
+    );
 
 
   totalDiezmoEl.textContent =
-    "- " + formatMoney(data.tithe);
+    "- " +
+    formatMoney(
+      data.tithe
+    );
 
 
   totalIngresosEl.textContent =
-    formatMoney(data.netIncome);
+    formatMoney(
+      data.netIncome
+    );
+
+
+  totalFijosEl.textContent =
+    formatMoney(
+      data.totalFixedExpenses
+    );
+
+
+  totalVariablesEl.textContent =
+    formatMoney(
+      data.totalVariableExpenses
+    );
 
 
   totalEgresosEl.textContent =
-    formatMoney(data.totalExpenses);
+    formatMoney(
+      data.totalExpenses
+    );
+
+
+  resultadoMesEl.textContent =
+    formatMoney(
+      data.monthlyResult
+    );
 
 
   saldoEl.textContent =
-    formatMoney(data.balance);
+    formatMoney(
+      data.finalBalance
+    );
 
 
-  if (titheCheckbox.checked) {
+  // Diezmo
 
-    titheLine.style.display =
-      "flex";
+  titheLine.style.display =
+    titheCheckbox.checked
+      ? "flex"
+      : "none";
+
+
+  // Resultado del mes
+
+  if (data.monthlyResult > 0) {
+
+    resultadoMesLabelEl.textContent =
+      "Resultado a favor";
+
+  }
+
+  else if (
+    data.monthlyResult < 0
+  ) {
+
+    resultadoMesLabelEl.textContent =
+      "Resultado por cubrir";
 
   }
 
   else {
 
-    titheLine.style.display =
-      "none";
+    resultadoMesLabelEl.textContent =
+      "Resultado del mes";
 
   }
 
 
-  if (data.balance > 0) {
+  // Saldo final
+
+  if (data.finalBalance > 0) {
 
     saldoLabelEl.textContent =
-      "Saldo a favor";
+      "Saldo disponible";
 
   }
 
-  else if (data.balance < 0) {
+  else if (
+    data.finalBalance < 0
+  ) {
 
     saldoLabelEl.textContent =
       "Saldo por cubrir";
@@ -360,21 +541,41 @@ function calculate() {
   else {
 
     saldoLabelEl.textContent =
-      "Saldo";
+      "Saldo disponible";
 
   }
 
 
+  /*
+    IMPORTANTE:
+
+    La reflexión se calcula sobre el resultado
+    ANTES del ahorro.
+
+    De esta manera ahorrar no aparece como algo
+    que empeora la situación financiera.
+  */
+
   updateReflection(
-    data.balance,
-    data.netIncome
+    data.monthlyResult,
+    data.netIncome,
+    data.savings,
+    data.finalBalance
   );
 
 }
 
 
+// ------------------------------------------------------
+// REFLEXIONES
+// ------------------------------------------------------
 
-function updateReflection(balance, income) {
+function updateReflection(
+  monthlyResult,
+  income,
+  savings,
+  finalBalance
+) {
 
   if (income === 0) {
 
@@ -392,146 +593,14 @@ function updateReflection(balance, income) {
 
 
   const marginPercentage =
-    (balance / income) * 100;
+    (monthlyResult / income) * 100;
 
 
+  // ----------------------------------------------------
+  // RESULTADO NEGATIVO
+  // ----------------------------------------------------
 
-  // EXCEDENTE
-
-  if (
-    balance > 0 &&
-    marginPercentage > 5
-  ) {
-
-    questionsEl.innerHTML = `
-
-      <p>
-        <strong>
-          Terminaste el mes con un excedente.
-        </strong>
-      </p>
-
-      <p>
-        Dios no solo nos llama a administrar con fidelidad
-        cuando falta, sino también cuando sobra.
-      </p>
-
-      <p>
-        <strong>
-          Conversalo con Dios:
-        </strong>
-      </p>
-
-      <p>
-        <strong>
-          ¿Cómo puedo administrar este excedente
-          de una manera que honre a Dios?
-        </strong>
-      </p>
-
-      <p>
-        <strong>
-          Algunas ideas:
-        </strong>
-      </p>
-
-      <ul>
-
-        <li>
-          Ser generoso y bendecir a alguien.
-        </li>
-
-        <li>
-          Fortalecer mi ahorro o fondo de emergencia.
-        </li>
-
-        <li>
-          Prepararme para una necesidad o proyecto futuro.
-        </li>
-
-        <li>
-          <strong>Invertir con propósito</strong>,
-          por ejemplo, campamentos, Corazón por la Misión,
-          CA u otros proyectos.
-        </li>
-
-      </ul>
-
-    `;
-
-  }
-
-
-
-  // EQUILIBRIO
-
-  else if (balance >= 0) {
-
-    questionsEl.innerHTML = `
-
-      <p>
-        <strong>
-          Lograste mantener un equilibrio entre
-          tus ingresos y tus egresos.
-        </strong>
-      </p>
-
-      <p>
-        Es una buena base para seguir creciendo
-        en una administración sabia.
-      </p>
-
-      <p>
-        <strong>
-          Conversalo con Dios:
-        </strong>
-      </p>
-
-      <p>
-        <strong>
-          ¿Qué pequeño cambio puedo hacer para empezar
-          a generar margen en mis finanzas?
-        </strong>
-      </p>
-
-      <p>
-        <strong>
-          Algunas ideas:
-        </strong>
-      </p>
-
-      <ul>
-
-        <li>
-          Revisar si hay algún gasto que podría reducir.
-        </li>
-
-        <li>
-          Planificar mejor alguna compra o gasto
-          antes de hacerlo.
-        </li>
-
-        <li>
-          Comenzar a separar una pequeña cantidad
-          para ahorro o imprevistos.
-        </li>
-
-        <li>
-          Buscar alguna oportunidad para aumentar
-          mis ingresos.
-        </li>
-
-      </ul>
-
-    `;
-
-  }
-
-
-
-  // SALDO POR CUBRIR
-
-  else {
+  if (monthlyResult < 0) {
 
     questionsEl.innerHTML = `
 
@@ -570,8 +639,8 @@ function updateReflection(balance, income) {
       <ul>
 
         <li>
-          Identificar cuál es el gasto que hoy
-          tiene mayor impacto.
+          Identificar cuál es el gasto
+          que hoy tiene mayor impacto.
         </li>
 
         <li>
@@ -579,41 +648,217 @@ function updateReflection(balance, income) {
           que no sea prioritario.
         </li>
 
-       <li>
-  Dar un paso de fe y buscar maneras de aumentar mis ingresos:
-  buscar un trabajo nuevo, hacer horas extras,
-  comenzar un emprendimiento, capacitarme
-  o explorar una nueva oportunidad.
-</li>
+        <li>
+          Dar un paso de fe y buscar maneras
+          de aumentar mis ingresos:
+          buscar un trabajo nuevo,
+          hacer horas extras,
+          comenzar un emprendimiento,
+          capacitarme o explorar
+          una nueva oportunidad.
+        </li>
 
         <li>
-          Pedir consejo o ayuda si necesito acompañamiento
-          para ordenar mis finanzas.
+          Pedir consejo o ayuda si necesito
+          acompañamiento para ordenar
+          mis finanzas.
         </li>
 
       </ul>
 
     `;
 
+    return;
+
   }
+
+
+  // ----------------------------------------------------
+  // EXCEDENTE
+  // ----------------------------------------------------
+
+  if (
+    monthlyResult > 0 &&
+    marginPercentage > 5
+  ) {
+
+    let ahorroTexto = "";
+
+    if (savings > 0) {
+
+      ahorroTexto = `
+
+        <p>
+          Además, decidiste separar
+          <strong>${formatMoney(savings)}</strong>
+          para ahorro o fondo de emergencia.
+        </p>
+
+      `;
+
+    }
+
+
+    questionsEl.innerHTML = `
+
+      <p>
+        <strong>
+          Terminaste el mes con un excedente.
+        </strong>
+      </p>
+
+      <p>
+        Dios no solo nos llama a administrar
+        con fidelidad cuando falta,
+        sino también cuando sobra.
+      </p>
+
+      ${ahorroTexto}
+
+      <p>
+        <strong>
+          Conversalo con Dios:
+        </strong>
+      </p>
+
+      <p>
+        <strong>
+          ¿Cómo puedo administrar este excedente
+          de una manera que honre a Dios?
+        </strong>
+      </p>
+
+      <p>
+        <strong>
+          Algunas ideas:
+        </strong>
+      </p>
+
+      <ul>
+
+        <li>
+          Ser generoso y bendecir a alguien.
+        </li>
+
+        <li>
+          Fortalecer mi ahorro
+          o fondo de emergencia.
+        </li>
+
+        <li>
+          Prepararme para una necesidad
+          o proyecto futuro.
+        </li>
+
+        <li>
+          <strong>
+            Invertir con propósito
+          </strong>,
+          por ejemplo, campamentos,
+          Corazón por la Misión,
+          CA u otros proyectos.
+        </li>
+
+      </ul>
+
+    `;
+
+    return;
+
+  }
+
+
+  // ----------------------------------------------------
+  // EQUILIBRIO
+  // ----------------------------------------------------
+
+  questionsEl.innerHTML = `
+
+    <p>
+      <strong>
+        Lograste mantener un equilibrio
+        entre tus ingresos y tus egresos.
+      </strong>
+    </p>
+
+    <p>
+      Es una buena base para seguir creciendo
+      en una administración sabia.
+    </p>
+
+    <p>
+      <strong>
+        Conversalo con Dios:
+      </strong>
+    </p>
+
+    <p>
+      <strong>
+        ¿Qué pequeño cambio puedo hacer
+        para empezar a generar margen
+        en mis finanzas?
+      </strong>
+    </p>
+
+    <p>
+      <strong>
+        Algunas ideas:
+      </strong>
+    </p>
+
+    <ul>
+
+      <li>
+        Revisar si hay algún gasto
+        que podría reducir.
+      </li>
+
+      <li>
+        Planificar mejor alguna compra
+        o gasto antes de hacerlo.
+      </li>
+
+      <li>
+        Comenzar a separar una pequeña cantidad
+        para ahorro o imprevistos.
+      </li>
+
+      <li>
+        Buscar alguna oportunidad
+        para aumentar mis ingresos.
+      </li>
+
+    </ul>
+
+  `;
 
 }
 
 
+// ------------------------------------------------------
+// CREAR EGRESOS
+// ------------------------------------------------------
 
 createExpenses();
 
 
+// ------------------------------------------------------
+// EVENTOS
+// ------------------------------------------------------
 
 document.addEventListener(
   "input",
-  (event) => {
+  event => {
 
     if (
-      event.target.classList.contains("money")
+      event.target.classList.contains(
+        "money"
+      )
     ) {
 
-      formatInput(event.target);
+      formatInput(
+        event.target
+      );
 
       calculate();
 
@@ -623,28 +868,30 @@ document.addEventListener(
 );
 
 
-
 titheCheckbox.addEventListener(
   "change",
   calculate
 );
 
 
+// ------------------------------------------------------
+// LIMPIAR INGRESOS
+// ------------------------------------------------------
 
 clearIncomeButton.addEventListener(
   "click",
   () => {
 
-    incomeInputs.forEach((input) => {
+    incomeInputs.forEach(
+      input => {
 
-      input.value = "";
+        input.value = "";
 
-    });
-
+      }
+    );
 
     titheCheckbox.checked =
       false;
-
 
     calculate();
 
@@ -652,19 +899,25 @@ clearIncomeButton.addEventListener(
 );
 
 
+// ------------------------------------------------------
+// LIMPIAR EGRESOS
+// ------------------------------------------------------
 
 clearExpensesButton.addEventListener(
   "click",
   () => {
 
     document
-      .querySelectorAll(".expense-input")
-      .forEach((input) => {
+      .querySelectorAll(
+        ".expense-input"
+      )
+      .forEach(
+        input => {
 
-        input.value = "";
+          input.value = "";
 
-      });
-
+        }
+      );
 
     calculate();
 
@@ -672,22 +925,25 @@ clearExpensesButton.addEventListener(
 );
 
 
+// ------------------------------------------------------
+// MES ACTUAL
+// ------------------------------------------------------
 
 function setCurrentMonth() {
 
   const today =
     new Date();
 
-
   const year =
     today.getFullYear();
-
 
   const month =
     String(
       today.getMonth() + 1
-    ).padStart(2, "0");
-
+    ).padStart(
+      2,
+      "0"
+    );
 
   mesInput.value =
     `${year}-${month}`;
@@ -695,10 +951,12 @@ function setCurrentMonth() {
 }
 
 
-
 setCurrentMonth();
 
 
+// ------------------------------------------------------
+// NOMBRE DEL MES
+// ------------------------------------------------------
 
 function getMonthName(value) {
 
@@ -706,12 +964,11 @@ function getMonthName(value) {
     return "";
   }
 
-
   const [year, month] =
     value.split("-");
 
-
   const months = [
+
     "Enero",
     "Febrero",
     "Marzo",
@@ -724,68 +981,76 @@ function getMonthName(value) {
     "Octubre",
     "Noviembre",
     "Diciembre"
+
   ];
 
-
-  return `${months[Number(month) - 1]} ${year}`;
+  return (
+    `${months[
+      Number(month) - 1
+    ]} ${year}`
+  );
 
 }
 
 
+// ------------------------------------------------------
+// CARGAR LOGOS PARA PDF
+// ------------------------------------------------------
 
 function loadImageAsDataURL(src) {
 
-  return new Promise((resolve, reject) => {
+  return new Promise(
+    (resolve, reject) => {
 
-    const img =
-      new Image();
+      const img =
+        new Image();
 
+      img.onload =
+        function () {
 
-    img.onload =
-      function () {
+          const canvas =
+            document.createElement(
+              "canvas"
+            );
 
-        const canvas =
-          document.createElement("canvas");
+          canvas.width =
+            img.naturalWidth;
 
+          canvas.height =
+            img.naturalHeight;
 
-        canvas.width =
-          img.naturalWidth;
+          const ctx =
+            canvas.getContext("2d");
 
+          ctx.drawImage(
+            img,
+            0,
+            0
+          );
 
-        canvas.height =
-          img.naturalHeight;
+          resolve(
+            canvas.toDataURL(
+              "image/png"
+            )
+          );
 
+        };
 
-        const ctx =
-          canvas.getContext("2d");
+      img.onerror =
+        reject;
 
+      img.src =
+        src;
 
-        ctx.drawImage(
-          img,
-          0,
-          0
-        );
-
-
-        resolve(
-          canvas.toDataURL("image/png")
-        );
-
-      };
-
-
-    img.onerror =
-      reject;
-
-
-    img.src =
-      src;
-
-  });
+    }
+  );
 
 }
 
 
+// ======================================================
+// PDF
+// ======================================================
 
 async function createPDF() {
 
@@ -795,9 +1060,16 @@ async function createPDF() {
 
   const doc =
     new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4"
+
+      orientation:
+        "portrait",
+
+      unit:
+        "mm",
+
+      format:
+        "a4"
+
     });
 
 
@@ -818,8 +1090,14 @@ async function createPDF() {
 
   const monthFile =
     monthText
-      .replace(/\s+/g, "_")
-      .replace(/[^\wÀ-ÿ_-]/g, "");
+      .replace(
+        /\s+/g,
+        "_"
+      )
+      .replace(
+        /[^\wÀ-ÿ_-]/g,
+        ""
+      );
 
 
   const compromiso =
@@ -829,23 +1107,29 @@ async function createPDF() {
   const margin =
     18;
 
-
   const pageWidth =
-    doc.internal.pageSize.getWidth();
-
+    doc.internal.pageSize
+      .getWidth();
 
   const contentWidth =
-    pageWidth - margin * 2;
-
+    pageWidth -
+    margin * 2;
 
   let y =
     20;
 
 
+// ------------------------------------------------------
+// FUNCIONES PDF
+// ------------------------------------------------------
 
-  function checkPage(space = 12) {
+  function checkPage(
+    space = 12
+  ) {
 
-    if (y + space > 270) {
+    if (
+      y + space > 270
+    ) {
 
       doc.addPage();
 
@@ -856,20 +1140,16 @@ async function createPDF() {
   }
 
 
-
   function title(text) {
 
     checkPage(15);
-
 
     doc.setFont(
       "helvetica",
       "bold"
     );
 
-
     doc.setFontSize(16);
-
 
     doc.setTextColor(
       25,
@@ -877,6 +1157,33 @@ async function createPDF() {
       25
     );
 
+    doc.text(
+      text,
+      margin,
+      y
+    );
+
+    y += 9;
+
+  }
+
+
+  function subtitle(text) {
+
+    checkPage(10);
+
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
+    doc.setFontSize(11);
+
+    doc.setTextColor(
+      80,
+      80,
+      80
+    );
 
     doc.text(
       text,
@@ -884,11 +1191,9 @@ async function createPDF() {
       y
     );
 
-
-    y += 9;
+    y += 7;
 
   }
-
 
 
   function row(
@@ -899,17 +1204,18 @@ async function createPDF() {
 
     checkPage(8);
 
-
     doc.setFont(
       "helvetica",
-      bold ? "bold" : "normal"
+      bold
+        ? "bold"
+        : "normal"
     );
-
 
     doc.setFontSize(
-      bold ? 11 : 10
+      bold
+        ? 11
+        : 10
     );
-
 
     doc.setTextColor(
       35,
@@ -917,28 +1223,25 @@ async function createPDF() {
       35
     );
 
-
     doc.text(
       label,
       margin,
       y
     );
 
-
     doc.text(
       value,
       pageWidth - margin,
       y,
       {
-        align: "right"
+        align:
+          "right"
       }
     );
-
 
     y += 7;
 
   }
-
 
 
   function divider() {
@@ -949,7 +1252,6 @@ async function createPDF() {
       220
     );
 
-
     doc.line(
       margin,
       y,
@@ -957,11 +1259,9 @@ async function createPDF() {
       y
     );
 
-
     y += 7;
 
   }
-
 
 
   function paragraph(
@@ -975,20 +1275,18 @@ async function createPDF() {
         contentWidth
       );
 
-
     checkPage(
       lines.length * 5 + 3
     );
 
-
     doc.setFont(
       "helvetica",
-      bold ? "bold" : "normal"
+      bold
+        ? "bold"
+        : "normal"
     );
 
-
     doc.setFontSize(10);
-
 
     doc.setTextColor(
       55,
@@ -996,19 +1294,16 @@ async function createPDF() {
       55
     );
 
-
     doc.text(
       lines,
       margin,
       y
     );
 
-
     y +=
       lines.length * 5 + 4;
 
   }
-
 
 
   function bullet(text) {
@@ -1019,20 +1314,16 @@ async function createPDF() {
         contentWidth - 7
       );
 
-
     checkPage(
       lines.length * 5 + 2
     );
-
 
     doc.setFont(
       "helvetica",
       "normal"
     );
 
-
     doc.setFontSize(10);
-
 
     doc.setTextColor(
       55,
@@ -1040,13 +1331,11 @@ async function createPDF() {
       55
     );
 
-
     doc.text(
       "•",
       margin,
       y
     );
-
 
     doc.text(
       lines,
@@ -1054,24 +1343,22 @@ async function createPDF() {
       y
     );
 
-
     y +=
       lines.length * 5 + 3;
 
   }
 
 
-
-  // CABECERA
+// ------------------------------------------------------
+// CABECERA PDF
+// ------------------------------------------------------
 
   doc.setFont(
     "helvetica",
     "bold"
   );
 
-
   doc.setFontSize(24);
-
 
   doc.setTextColor(
     20,
@@ -1079,13 +1366,13 @@ async function createPDF() {
     20
   );
 
-
   doc.text(
     "RAICES 8",
     pageWidth / 2,
     y,
     {
-      align: "center"
+      align:
+        "center"
     }
   );
 
@@ -1096,15 +1383,12 @@ async function createPDF() {
     0
   );
 
-
   doc.setFontSize(18);
-
 
   doc.setFont(
     "helvetica",
     "bolditalic"
   );
-
 
   doc.text(
     "PWH",
@@ -1121,9 +1405,7 @@ async function createPDF() {
     "bold"
   );
 
-
   doc.setFontSize(12);
-
 
   doc.setTextColor(
     55,
@@ -1131,19 +1413,18 @@ async function createPDF() {
     55
   );
 
-
   doc.text(
     "Aplicación práctica: Mi Presupuesto",
     pageWidth / 2,
     y,
     {
-      align: "center"
+      align:
+        "center"
     }
   );
 
 
   y += 12;
-
 
   divider();
 
@@ -1165,29 +1446,42 @@ async function createPDF() {
   y += 4;
 
 
+// ------------------------------------------------------
+// INGRESOS PDF
+// ------------------------------------------------------
 
-  // INGRESOS
-
-  title("Ingresos");
+  title(
+    "Ingresos"
+  );
 
 
   const incomeNames = [
-    "Sueldo",
+
+    "Ingreso fijo",
+    "Ingreso variable",
     "Ayuda familiar",
     "Beca",
     "Otros ingresos"
+
   ];
 
 
   incomeInputs.forEach(
     (input, index) => {
 
-      row(
-        incomeNames[index],
-        formatMoney(
-          parseMoney(input.value)
-        )
-      );
+      const amount =
+        parseMoney(
+          input.value
+        );
+
+      if (amount > 0) {
+
+        row(
+          incomeNames[index],
+          formatMoney(amount)
+        );
+
+      }
 
     }
   );
@@ -1211,7 +1505,8 @@ async function createPDF() {
 
     row(
       "Diezmo (10%)",
-      "- " + formatMoney(
+      "- " +
+      formatMoney(
         data.tithe
       )
     );
@@ -1231,25 +1526,33 @@ async function createPDF() {
   y += 6;
 
 
+// ------------------------------------------------------
+// EGRESOS FIJOS PDF
+// ------------------------------------------------------
 
-  // EGRESOS
+  title(
+    "Egresos"
+  );
 
-  title("Egresos");
+
+  subtitle(
+    "Egresos fijos"
+  );
 
 
-  const activeExpenses =
-    data.expenses.filter(
+  const activeFixed =
+    data.fixedExpenses.filter(
       expense =>
         expense.amount > 0
     );
 
 
   if (
-    activeExpenses.length === 0
+    activeFixed.length === 0
   ) {
 
     row(
-      "Sin egresos cargados",
+      "Sin egresos fijos cargados",
       ""
     );
 
@@ -1257,18 +1560,86 @@ async function createPDF() {
 
   else {
 
-    activeExpenses.forEach(
-      (expense) => {
+    activeFixed.forEach(
+      expense => {
 
         row(
           expense.category,
-          `${formatMoney(expense.amount)}   ${expense.percentage}%`
+          `${formatMoney(
+            expense.amount
+          )}   ${expense.percentage}%`
         );
 
       }
     );
 
   }
+
+
+  row(
+    "Total egresos fijos",
+    formatMoney(
+      data.totalFixedExpenses
+    ),
+    true
+  );
+
+
+  y += 4;
+
+
+// ------------------------------------------------------
+// EGRESOS VARIABLES PDF
+// ------------------------------------------------------
+
+  subtitle(
+    "Egresos variables"
+  );
+
+
+  const activeVariable =
+    data.variableExpenses.filter(
+      expense =>
+        expense.amount > 0
+    );
+
+
+  if (
+    activeVariable.length === 0
+  ) {
+
+    row(
+      "Sin egresos variables cargados",
+      ""
+    );
+
+  }
+
+  else {
+
+    activeVariable.forEach(
+      expense => {
+
+        row(
+          expense.category,
+          `${formatMoney(
+            expense.amount
+          )}   ${expense.percentage}%`
+        );
+
+      }
+    );
+
+  }
+
+
+  row(
+    "Total egresos variables",
+    formatMoney(
+      data.totalVariableExpenses
+    ),
+    true
+  );
 
 
   divider();
@@ -1286,10 +1657,75 @@ async function createPDF() {
   y += 6;
 
 
+// ------------------------------------------------------
+// RESULTADO DEL MES PDF
+// ------------------------------------------------------
 
-  // SALDO
+  title(
+    "Resultado del mes"
+  );
 
-  checkPage(20);
+
+  row(
+    "Ingresos disponibles",
+    formatMoney(
+      data.netIncome
+    )
+  );
+
+
+  row(
+    "Total egresos",
+    "- " +
+    formatMoney(
+      data.totalExpenses
+    )
+  );
+
+
+  row(
+    "Resultado del mes",
+    formatMoney(
+      data.monthlyResult
+    ),
+    true
+  );
+
+
+  y += 6;
+
+
+// ------------------------------------------------------
+// AHORRO PDF
+// ------------------------------------------------------
+
+  title(
+    "Ahorro / Fondo de emergencia"
+  );
+
+
+  paragraph(
+    "Separar antes de gastar."
+  );
+
+
+  row(
+    "Ahorro separado",
+    formatMoney(
+      data.savings
+    ),
+    true
+  );
+
+
+  y += 5;
+
+
+// ------------------------------------------------------
+// SALDO FINAL PDF
+// ------------------------------------------------------
+
+  checkPage(25);
 
 
   doc.setFillColor(
@@ -1310,24 +1746,15 @@ async function createPDF() {
   );
 
 
-  let saldoLabel =
-    "Saldo";
+  let finalLabel =
+    "Saldo disponible";
 
 
   if (
-    data.balance > 0
+    data.finalBalance < 0
   ) {
 
-    saldoLabel =
-      "Saldo a favor";
-
-  }
-
-  else if (
-    data.balance < 0
-  ) {
-
-    saldoLabel =
+    finalLabel =
       "Saldo por cubrir";
 
   }
@@ -1338,9 +1765,7 @@ async function createPDF() {
     "bold"
   );
 
-
   doc.setFontSize(13);
-
 
   doc.setTextColor(
     255,
@@ -1350,14 +1775,13 @@ async function createPDF() {
 
 
   doc.text(
-    saldoLabel,
+    finalLabel,
     margin + 6,
     y + 11
   );
 
 
   doc.setFontSize(15);
-
 
   doc.setTextColor(
     255,
@@ -1368,12 +1792,15 @@ async function createPDF() {
 
   doc.text(
     formatMoney(
-      data.balance
+      data.finalBalance
     ),
-    pageWidth - margin - 6,
+    pageWidth -
+    margin -
+    6,
     y + 11,
     {
-      align: "right"
+      align:
+        "right"
     }
   );
 
@@ -1381,8 +1808,9 @@ async function createPDF() {
   y += 28;
 
 
-
-  // REFLEXIÓN
+// ------------------------------------------------------
+// REFLEXIÓN PDF
+// ------------------------------------------------------
 
   title(
     "Reflexionemos"
@@ -1392,14 +1820,11 @@ async function createPDF() {
   const marginPercentage =
     data.netIncome > 0
       ? (
-          data.balance
-          / data.netIncome
+          data.monthlyResult /
+          data.netIncome
         ) * 100
       : 0;
 
-
-
-  // EXCEDENTE
 
   if (
     data.netIncome === 0
@@ -1411,168 +1836,46 @@ async function createPDF() {
 
   }
 
-  else if (
-    data.balance > 0 &&
-    marginPercentage > 5
-  ) {
-
-    paragraph(
-      "Terminaste el mes con un excedente.",
-      true
-    );
-
-
-    paragraph(
-      "Dios no solo nos llama a administrar con fidelidad cuando falta, sino también cuando sobra."
-    );
-
-
-    paragraph(
-      "Conversalo con Dios:",
-      true
-    );
-
-
-    paragraph(
-      "¿Cómo puedo administrar este excedente de una manera que honre a Dios?",
-      true
-    );
-
-
-    paragraph(
-      "Algunas ideas:",
-      true
-    );
-
-
-    bullet(
-      "Ser generoso y bendecir a alguien."
-    );
-
-
-    bullet(
-      "Fortalecer mi ahorro o fondo de emergencia."
-    );
-
-
-    bullet(
-      "Prepararme para una necesidad o proyecto futuro."
-    );
-
-
-    bullet(
-      "Invertir con propósito, por ejemplo, campamentos, Corazón por la Misión, CA u otros proyectos."
-    );
-
-  }
-
-
-
-  // EQUILIBRIO
 
   else if (
-    data.balance >= 0
+    data.monthlyResult < 0
   ) {
-
-    paragraph(
-      "Lograste mantener un equilibrio entre tus ingresos y tus egresos.",
-      true
-    );
-
-
-    paragraph(
-      "Es una buena base para seguir creciendo en una administración sabia."
-    );
-
-
-    paragraph(
-      "Conversalo con Dios:",
-      true
-    );
-
-
-    paragraph(
-      "¿Qué pequeño cambio puedo hacer para empezar a generar margen en mis finanzas?",
-      true
-    );
-
-
-    paragraph(
-      "Algunas ideas:",
-      true
-    );
-
-
-    bullet(
-      "Revisar si hay algún gasto que podría reducir."
-    );
-
-
-    bullet(
-      "Planificar mejor alguna compra o gasto antes de hacerlo."
-    );
-
-
-    bullet(
-      "Comenzar a separar una pequeña cantidad para ahorro o imprevistos."
-    );
-
-
-    bullet(
-      "Buscar alguna oportunidad para aumentar mis ingresos."
-    );
-
-  }
-
-
-
-  // SALDO POR CUBRIR
-
-  else {
 
     paragraph(
       "Lo más importante ya ocurrió: ordenarte es un paso de fe.",
       true
     );
 
-
     paragraph(
       "Reconocer dónde estamos nos permite comenzar a tomar decisiones que nos acerquen a una administración más sabia."
     );
-
 
     paragraph(
       "Conversalo con Dios:",
       true
     );
 
-
     paragraph(
       "¿Cuál es el próximo paso que puedo dar para comenzar a ordenar mis finanzas?",
       true
     );
-
 
     paragraph(
       "Algunas ideas:",
       true
     );
 
-
     bullet(
       "Identificar cuál es el gasto que hoy tiene mayor impacto."
     );
-
 
     bullet(
       "Reducir o postergar algún gasto que no sea prioritario."
     );
 
-
     bullet(
-  "Dar un paso de fe y buscar maneras de aumentar mis ingresos: buscar un trabajo nuevo, hacer horas extras, comenzar un emprendimiento, capacitarme o explorar una nueva oportunidad."
-);
-
+      "Dar un paso de fe y buscar maneras de aumentar mis ingresos: buscar un trabajo nuevo, hacer horas extras, comenzar un emprendimiento, capacitarme o explorar una nueva oportunidad."
+    );
 
     bullet(
       "Pedir consejo o ayuda si necesito acompañamiento para ordenar mis finanzas."
@@ -1581,11 +1884,118 @@ async function createPDF() {
   }
 
 
+  else if (
+    data.monthlyResult > 0 &&
+    marginPercentage > 5
+  ) {
 
-  // COMPROMISO
+    paragraph(
+      "Terminaste el mes con un excedente.",
+      true
+    );
+
+    paragraph(
+      "Dios no solo nos llama a administrar con fidelidad cuando falta, sino también cuando sobra."
+    );
+
+
+    if (
+      data.savings > 0
+    ) {
+
+      paragraph(
+        `Decidiste separar ${formatMoney(
+          data.savings
+        )} para ahorro o fondo de emergencia.`
+      );
+
+    }
+
+
+    paragraph(
+      "Conversalo con Dios:",
+      true
+    );
+
+    paragraph(
+      "¿Cómo puedo administrar este excedente de una manera que honre a Dios?",
+      true
+    );
+
+    paragraph(
+      "Algunas ideas:",
+      true
+    );
+
+    bullet(
+      "Ser generoso y bendecir a alguien."
+    );
+
+    bullet(
+      "Fortalecer mi ahorro o fondo de emergencia."
+    );
+
+    bullet(
+      "Prepararme para una necesidad o proyecto futuro."
+    );
+
+    bullet(
+      "Invertir con propósito, por ejemplo, campamentos, Corazón por la Misión, CA u otros proyectos."
+    );
+
+  }
+
+
+  else {
+
+    paragraph(
+      "Lograste mantener un equilibrio entre tus ingresos y tus egresos.",
+      true
+    );
+
+    paragraph(
+      "Es una buena base para seguir creciendo en una administración sabia."
+    );
+
+    paragraph(
+      "Conversalo con Dios:",
+      true
+    );
+
+    paragraph(
+      "¿Qué pequeño cambio puedo hacer para empezar a generar margen en mis finanzas?",
+      true
+    );
+
+    paragraph(
+      "Algunas ideas:",
+      true
+    );
+
+    bullet(
+      "Revisar si hay algún gasto que podría reducir."
+    );
+
+    bullet(
+      "Planificar mejor alguna compra o gasto antes de hacerlo."
+    );
+
+    bullet(
+      "Comenzar a separar una pequeña cantidad para ahorro o imprevistos."
+    );
+
+    bullet(
+      "Buscar alguna oportunidad para aumentar mis ingresos."
+    );
+
+  }
+
+
+// ------------------------------------------------------
+// COMPROMISO PDF
+// ------------------------------------------------------
 
   y += 5;
-
 
   title(
     "Mi compromiso"
@@ -1608,7 +2018,6 @@ async function createPDF() {
       "_______________________________________________"
     );
 
-
     paragraph(
       "_______________________________________________"
     );
@@ -1616,8 +2025,9 @@ async function createPDF() {
   }
 
 
-
-  // LOGOS
+// ------------------------------------------------------
+// LOGOS PDF
+// ------------------------------------------------------
 
   try {
 
@@ -1625,7 +2035,6 @@ async function createPDF() {
       await loadImageAsDataURL(
         "img/logo-powerhouse.PNG"
       );
-
 
     const logoRaices =
       await loadImageAsDataURL(
@@ -1685,13 +2094,20 @@ async function createPDF() {
   }
 
 
-
-  // DESCARGA
+// ------------------------------------------------------
+// DESCARGAR PDF
+// ------------------------------------------------------
 
   const safeName =
     nombre
-      .replace(/\s+/g, "_")
-      .replace(/[^\w-]/g, "");
+      .replace(
+        /\s+/g,
+        "_"
+      )
+      .replace(
+        /[^\w-]/g,
+        ""
+      );
 
 
   doc.save(
@@ -1701,11 +2117,18 @@ async function createPDF() {
 }
 
 
+// ------------------------------------------------------
+// BOTÓN PDF
+// ------------------------------------------------------
 
 downloadBudgetButton.addEventListener(
   "click",
   createPDF
 );
 
+
+// ------------------------------------------------------
+// PRIMER CÁLCULO
+// ------------------------------------------------------
 
 calculate();
