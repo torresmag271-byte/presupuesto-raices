@@ -492,3 +492,37 @@ footer img{
     }
 
 }
+/* =====================================================
+   IMPRESIÓN
+===================================================== */
+
+@media print {
+
+    body {
+        background: white;
+    }
+
+    .container {
+        max-width: none;
+        padding: 0;
+    }
+
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .clear-button,
+    .download-section {
+        display: none !important;
+    }
+
+    footer {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+}
