@@ -177,7 +177,6 @@ function createExpenseRow(category, type) {
 
     </div>
 
-
     <div class="expense-progress">
 
       <div class="expense-bar">
@@ -415,6 +414,322 @@ function updateExpenseBars(
 }
 
 
+// ======================================================
+// REFLEXIONES
+// UNA SOLA LÓGICA PARA WEB + PDF
+// ======================================================
+
+function getReflection(data) {
+
+  // ----------------------------------------------------
+  // SIN INGRESOS
+  // ----------------------------------------------------
+
+  if (data.netIncome === 0) {
+
+    return {
+
+      type: "empty",
+
+      title:
+        "Completá tus ingresos y egresos para comenzar.",
+
+      paragraphs: [],
+
+      question: "",
+
+      ideas: []
+
+    };
+
+  }
+
+
+  // ----------------------------------------------------
+  // CASO 5 — RESULTADO NEGATIVO
+  // ----------------------------------------------------
+
+  if (data.monthlyResult < 0) {
+
+    return {
+
+      type: "negative",
+
+      title:
+        "Lo más importante ya ocurrió: ordenarte es un paso de fe.",
+
+      paragraphs: [
+
+        "Reconocer dónde estamos nos permite comenzar a tomar decisiones que nos acerquen a una administración más sabia."
+
+      ],
+
+      question:
+        "¿Cuál es el próximo paso que puedo dar para comenzar a ordenar mis finanzas?",
+
+      ideas: [
+
+        "Identificar cuál es el gasto que hoy tiene mayor impacto.",
+
+        "Reducir o postergar algún gasto que no sea prioritario.",
+
+        "Dar un paso de fe y buscar maneras de aumentar mis ingresos: buscar un trabajo nuevo, hacer horas extras, comenzar un emprendimiento, capacitarme o explorar una nueva oportunidad.",
+
+        "Pedir consejo o ayuda si necesito acompañamiento para ordenar mis finanzas."
+
+      ]
+
+    };
+
+  }
+
+
+  // ----------------------------------------------------
+  // CASO 4 — EQUILIBRIO NATURAL
+  // ----------------------------------------------------
+
+  if (data.monthlyResult === 0) {
+
+    return {
+
+      type: "equilibrium",
+
+      title:
+        "Lograste mantener un equilibrio entre tus ingresos y tus egresos.",
+
+      paragraphs: [
+
+        "Es una buena base para seguir creciendo en una administración sabia."
+
+      ],
+
+      question:
+        "¿Qué pequeño cambio puedo hacer para empezar a generar margen en mis finanzas?",
+
+      ideas: [
+
+        "Revisar si hay algún gasto que podría reducir.",
+
+        "Planificar mejor alguna compra o gasto antes de hacerlo.",
+
+        "Comenzar a separar una pequeña cantidad para ahorro o imprevistos.",
+
+        "Buscar alguna oportunidad para aumentar mis ingresos."
+
+      ]
+
+    };
+
+  }
+
+
+  // ----------------------------------------------------
+  // CASO 1 — EXCEDENTE SIN AHORRO
+  // ----------------------------------------------------
+
+  if (
+    data.monthlyResult > 0 &&
+    data.savings === 0
+  ) {
+
+    return {
+
+      type: "surplus-no-savings",
+
+      title:
+        "¡Terminaste el mes con un excedente!",
+
+      paragraphs: [
+
+        "Dios no solo nos llama a administrar con fidelidad cuando falta, sino también cuando sobra."
+
+      ],
+
+      question:
+        "¿Cómo puedo administrar este excedente de una manera que honre a Dios?",
+
+      ideas: [
+
+        "Ser generoso y bendecir a alguien.",
+
+        "Fortalecer o crear un fondo de emergencia.",
+
+        "Prepararme para una necesidad o proyecto futuro.",
+
+        "Invertir con propósito, por ejemplo, campamentos, Corazón por la Misión, Casa Abierta u otros proyectos."
+
+      ]
+
+    };
+
+  }
+
+
+  // ----------------------------------------------------
+  // CASO 3 — AHORRA TODO EL EXCEDENTE
+  // ----------------------------------------------------
+
+  if (
+    data.monthlyResult > 0 &&
+    data.savings === data.monthlyResult
+  ) {
+
+    return {
+
+      type: "surplus-all-saved",
+
+      title:
+        "¡Tuviste excedente y decidiste ahorrarlo!",
+
+      paragraphs: [
+
+        "Generar margen y decidir qué hacer con él también es parte de una administración sabia.",
+
+        `Separaste ${formatMoney(data.savings)} para ahorro o fondo de emergencia.`
+
+      ],
+
+      question:
+        "¿Cómo puedo administrar sabiamente este dinero que decidí guardar?",
+
+      ideas: [
+
+        "Definir para qué estoy ahorrando.",
+
+        "Si es un fondo de emergencia, mantenerlo disponible para cuando realmente lo necesite.",
+
+        "Si es un ahorro que no voy a necesitar en el corto plazo, aprender qué opciones existen para que ese dinero no pierda valor y pueda crecer con el tiempo.",
+
+        "Evaluar si una parte puede ser destinada a algún propósito, proyecto o inversión futura."
+
+      ]
+
+    };
+
+  }
+
+
+  // ----------------------------------------------------
+  // CASO 2 — AHORRO PARCIAL + EXCEDENTE FINAL
+  // ----------------------------------------------------
+
+  return {
+
+    type: "surplus-partial-savings",
+
+    title:
+      "¡Tuviste un excedente incluso después de haber separado un ahorro!",
+
+    paragraphs: [
+
+      "Dios no solo nos llama a administrar con fidelidad cuando falta, sino también cuando sobra.",
+
+      `Separaste ${formatMoney(data.savings)} para ahorro o fondo de emergencia.`
+
+    ],
+
+    question:
+      "¿Cómo puedo administrar este excedente de una manera que honre a Dios?",
+
+    ideas: [
+
+      "Ser generoso y bendecir a alguien.",
+
+      "Pensar cómo administrar el dinero que separaste: aprender qué opciones existen para que no pierda valor y pueda crecer con el tiempo.",
+
+      "Prepararme para una necesidad o proyecto futuro.",
+
+      "Invertir con propósito, por ejemplo, campamentos, Corazón por la Misión, Casa Abierta u otros proyectos."
+
+    ]
+
+  };
+
+}
+
+
+// ------------------------------------------------------
+// MOSTRAR REFLEXIÓN EN LA WEB
+// ------------------------------------------------------
+
+function updateReflection(data) {
+
+  const reflection =
+    getReflection(data);
+
+
+  if (reflection.type === "empty") {
+
+    questionsEl.innerHTML = `
+
+      <p>
+        ${reflection.title}
+      </p>
+
+    `;
+
+    return;
+
+  }
+
+
+  const paragraphs =
+    reflection.paragraphs
+      .map(
+        paragraph => `
+          <p>${paragraph}</p>
+        `
+      )
+      .join("");
+
+
+  const ideas =
+    reflection.ideas
+      .map(
+        idea => `
+          <li>${idea}</li>
+        `
+      )
+      .join("");
+
+
+  questionsEl.innerHTML = `
+
+    <p>
+      <strong>
+        ${reflection.title}
+      </strong>
+    </p>
+
+    ${paragraphs}
+
+    <p>
+      <strong>
+        Conversalo con Dios:
+      </strong>
+    </p>
+
+    <p>
+      <strong>
+        ${reflection.question}
+      </strong>
+    </p>
+
+    <p>
+      <strong>
+        Algunas ideas:
+      </strong>
+    </p>
+
+    <ul>
+      ${ideas}
+    </ul>
+
+  `;
+
+}
+
+
 // ------------------------------------------------------
 // CALCULAR PRESUPUESTO
 // ------------------------------------------------------
@@ -546,291 +861,7 @@ function calculate() {
   }
 
 
-  /*
-    IMPORTANTE:
-
-    La reflexión se calcula sobre el resultado
-    ANTES del ahorro.
-
-    De esta manera ahorrar no aparece como algo
-    que empeora la situación financiera.
-  */
-
-  updateReflection(
-    data.monthlyResult,
-    data.netIncome,
-    data.savings,
-    data.finalBalance
-  );
-
-}
-
-
-// ------------------------------------------------------
-// REFLEXIONES
-// ------------------------------------------------------
-
-function updateReflection(
-  monthlyResult,
-  income,
-  savings,
-  finalBalance
-) {
-
-  if (income === 0) {
-
-    questionsEl.innerHTML = `
-
-      <p>
-        Completá tus ingresos y egresos para comenzar.
-      </p>
-
-    `;
-
-    return;
-
-  }
-
-
-  const marginPercentage =
-    (monthlyResult / income) * 100;
-
-
-  // ----------------------------------------------------
-  // RESULTADO NEGATIVO
-  // ----------------------------------------------------
-
-  if (monthlyResult < 0) {
-
-    questionsEl.innerHTML = `
-
-      <p>
-        <strong>
-          Lo más importante ya ocurrió:
-          ordenarte es un paso de fe.
-        </strong>
-      </p>
-
-      <p>
-        Reconocer dónde estamos nos permite comenzar
-        a tomar decisiones que nos acerquen
-        a una administración más sabia.
-      </p>
-
-      <p>
-        <strong>
-          Conversalo con Dios:
-        </strong>
-      </p>
-
-      <p>
-        <strong>
-          ¿Cuál es el próximo paso que puedo dar
-          para comenzar a ordenar mis finanzas?
-        </strong>
-      </p>
-
-      <p>
-        <strong>
-          Algunas ideas:
-        </strong>
-      </p>
-
-      <ul>
-
-        <li>
-          Identificar cuál es el gasto
-          que hoy tiene mayor impacto.
-        </li>
-
-        <li>
-          Reducir o postergar algún gasto
-          que no sea prioritario.
-        </li>
-
-        <li>
-          Dar un paso de fe y buscar maneras
-          de aumentar mis ingresos:
-          buscar un trabajo nuevo,
-          hacer horas extras,
-          comenzar un emprendimiento,
-          capacitarme o explorar
-          una nueva oportunidad.
-        </li>
-
-        <li>
-          Pedir consejo o ayuda si necesito
-          acompañamiento para ordenar
-          mis finanzas.
-        </li>
-
-      </ul>
-
-    `;
-
-    return;
-
-  }
-
-
-  // ----------------------------------------------------
-  // EXCEDENTE
-  // ----------------------------------------------------
-
-  if (
-    monthlyResult > 0 &&
-    marginPercentage > 5
-  ) {
-
-    let ahorroTexto = "";
-
-    if (savings > 0) {
-
-      ahorroTexto = `
-
-        <p>
-          Además, decidiste separar
-          <strong>${formatMoney(savings)}</strong>
-          para ahorro o fondo de emergencia.
-        </p>
-
-      `;
-
-    }
-
-
-    questionsEl.innerHTML = `
-
-      <p>
-        <strong>
-          Terminaste el mes con un excedente.
-        </strong>
-      </p>
-
-      <p>
-        Dios no solo nos llama a administrar
-        con fidelidad cuando falta,
-        sino también cuando sobra.
-      </p>
-
-      ${ahorroTexto}
-
-      <p>
-        <strong>
-          Conversalo con Dios:
-        </strong>
-      </p>
-
-      <p>
-        <strong>
-          ¿Cómo puedo administrar este excedente
-          de una manera que honre a Dios?
-        </strong>
-      </p>
-
-      <p>
-        <strong>
-          Algunas ideas:
-        </strong>
-      </p>
-
-      <ul>
-
-        <li>
-          Ser generoso y bendecir a alguien.
-        </li>
-
-        <li>
-          Fortalecer mi ahorro
-          o fondo de emergencia.
-        </li>
-
-        <li>
-          Prepararme para una necesidad
-          o proyecto futuro.
-        </li>
-
-        <li>
-          <strong>
-            Invertir con propósito
-          </strong>,
-          por ejemplo, campamentos,
-          Corazón por la Misión,
-          CA u otros proyectos.
-        </li>
-
-      </ul>
-
-    `;
-
-    return;
-
-  }
-
-
-  // ----------------------------------------------------
-  // EQUILIBRIO
-  // ----------------------------------------------------
-
-  questionsEl.innerHTML = `
-
-    <p>
-      <strong>
-        Lograste mantener un equilibrio
-        entre tus ingresos y tus egresos.
-      </strong>
-    </p>
-
-    <p>
-      Es una buena base para seguir creciendo
-      en una administración sabia.
-    </p>
-
-    <p>
-      <strong>
-        Conversalo con Dios:
-      </strong>
-    </p>
-
-    <p>
-      <strong>
-        ¿Qué pequeño cambio puedo hacer
-        para empezar a generar margen
-        en mis finanzas?
-      </strong>
-    </p>
-
-    <p>
-      <strong>
-        Algunas ideas:
-      </strong>
-    </p>
-
-    <ul>
-
-      <li>
-        Revisar si hay algún gasto
-        que podría reducir.
-      </li>
-
-      <li>
-        Planificar mejor alguna compra
-        o gasto antes de hacerlo.
-      </li>
-
-      <li>
-        Comenzar a separar una pequeña cantidad
-        para ahorro o imprevistos.
-      </li>
-
-      <li>
-        Buscar alguna oportunidad
-        para aumentar mis ingresos.
-      </li>
-
-    </ul>
-
-  `;
+  updateReflection(data);
 
 }
 
@@ -843,7 +874,7 @@ createExpenses();
 
 
 // ------------------------------------------------------
-// EVENTOS
+// EVENTOS DE DINERO
 // ------------------------------------------------------
 
 document.addEventListener(
@@ -851,26 +882,117 @@ document.addEventListener(
   event => {
 
     if (
-      event.target.classList.contains(
+      !event.target.classList.contains(
         "money"
       )
     ) {
 
-      formatInput(
-        event.target
-      );
-
-      calculate();
+      return;
 
     }
+
+
+    formatInput(
+      event.target
+    );
+
+
+    // --------------------------------------------------
+    // VALIDAR AHORRO
+    // --------------------------------------------------
+
+    if (
+      event.target.id === "ahorro"
+    ) {
+
+      const data =
+        getBudgetData();
+
+      const savingsEntered =
+        parseMoney(
+          ahorroInput.value
+        );
+
+      const maximumSavings =
+        Math.max(
+          data.monthlyResult,
+          0
+        );
+
+
+      if (
+        savingsEntered >
+        maximumSavings
+      ) {
+
+        alert(
+          "No podés ahorrar más que el excedente disponible del mes."
+        );
+
+
+        ahorroInput.value =
+          maximumSavings > 0
+
+            ? new Intl.NumberFormat(
+                "es-AR"
+              ).format(
+                maximumSavings
+              )
+
+            : "";
+
+      }
+
+    }
+
+
+    calculate();
 
   }
 );
 
 
+// ------------------------------------------------------
+// DIEZMO
+// ------------------------------------------------------
+
 titheCheckbox.addEventListener(
   "change",
-  calculate
+  () => {
+
+    const data =
+      getBudgetData();
+
+
+    const maximumSavings =
+      Math.max(
+        data.monthlyResult,
+        0
+      );
+
+
+    if (
+      data.savings >
+      maximumSavings
+    ) {
+
+      ahorroInput.value =
+        maximumSavings > 0
+
+          ? new Intl.NumberFormat(
+              "es-AR"
+            ).format(
+              maximumSavings
+            )
+
+          : "";
+
+    }
+
+
+    calculate();
+
+  }
 );
 
 
@@ -890,8 +1012,14 @@ clearIncomeButton.addEventListener(
       }
     );
 
+
     titheCheckbox.checked =
       false;
+
+
+    ahorroInput.value =
+      "";
+
 
     calculate();
 
@@ -919,6 +1047,10 @@ clearExpensesButton.addEventListener(
         }
       );
 
+
+    // Si al limpiar egresos cambia el excedente,
+    // recalculamos normalmente.
+
     calculate();
 
   }
@@ -945,6 +1077,7 @@ function setCurrentMonth() {
       "0"
     );
 
+
   mesInput.value =
     `${year}-${month}`;
 
@@ -961,11 +1094,15 @@ setCurrentMonth();
 function getMonthName(value) {
 
   if (!value) {
+
     return "";
+
   }
+
 
   const [year, month] =
     value.split("-");
+
 
   const months = [
 
@@ -983,6 +1120,7 @@ function getMonthName(value) {
     "Diciembre"
 
   ];
+
 
   return (
     `${months[
@@ -1005,6 +1143,7 @@ function loadImageAsDataURL(src) {
       const img =
         new Image();
 
+
       img.onload =
         function () {
 
@@ -1013,20 +1152,24 @@ function loadImageAsDataURL(src) {
               "canvas"
             );
 
+
           canvas.width =
             img.naturalWidth;
 
           canvas.height =
             img.naturalHeight;
 
+
           const ctx =
             canvas.getContext("2d");
+
 
           ctx.drawImage(
             img,
             0,
             0
           );
+
 
           resolve(
             canvas.toDataURL(
@@ -1036,8 +1179,10 @@ function loadImageAsDataURL(src) {
 
         };
 
+
       img.onerror =
         reject;
+
 
       img.src =
         src;
@@ -1077,6 +1222,12 @@ async function createPDF() {
     getBudgetData();
 
 
+  // MISMA REFLEXIÓN QUE LA WEB
+
+  const reflection =
+    getReflection(data);
+
+
   const nombre =
     nombreInput.value.trim()
     || "Sin nombre";
@@ -1107,13 +1258,21 @@ async function createPDF() {
   const margin =
     18;
 
+
   const pageWidth =
     doc.internal.pageSize
       .getWidth();
 
+
+  const pageHeight =
+    doc.internal.pageSize
+      .getHeight();
+
+
   const contentWidth =
     pageWidth -
     margin * 2;
+
 
   let y =
     20;
@@ -1128,7 +1287,8 @@ async function createPDF() {
   ) {
 
     if (
-      y + space > 270
+      y + space >
+      pageHeight - 20
     ) {
 
       doc.addPage();
@@ -1246,6 +1406,8 @@ async function createPDF() {
 
   function divider() {
 
+    checkPage(8);
+
     doc.setDrawColor(
       220,
       220,
@@ -1275,9 +1437,11 @@ async function createPDF() {
         contentWidth
       );
 
+
     checkPage(
-      lines.length * 5 + 3
+      lines.length * 5 + 4
     );
+
 
     doc.setFont(
       "helvetica",
@@ -1300,6 +1464,7 @@ async function createPDF() {
       y
     );
 
+
     y +=
       lines.length * 5 + 4;
 
@@ -1314,9 +1479,11 @@ async function createPDF() {
         contentWidth - 7
       );
 
+
     checkPage(
-      lines.length * 5 + 2
+      lines.length * 5 + 3
     );
+
 
     doc.setFont(
       "helvetica",
@@ -1331,17 +1498,20 @@ async function createPDF() {
       55
     );
 
+
     doc.text(
       "•",
       margin,
       y
     );
 
+
     doc.text(
       lines,
       margin + 6,
       y
     );
+
 
     y +=
       lines.length * 5 + 3;
@@ -1366,6 +1536,7 @@ async function createPDF() {
     20
   );
 
+
   doc.text(
     "RAICES 8",
     pageWidth / 2,
@@ -1383,12 +1554,15 @@ async function createPDF() {
     0
   );
 
+
   doc.setFontSize(18);
+
 
   doc.setFont(
     "helvetica",
     "bolditalic"
   );
+
 
   doc.text(
     "PWH",
@@ -1405,13 +1579,16 @@ async function createPDF() {
     "bold"
   );
 
+
   doc.setFontSize(12);
+
 
   doc.setTextColor(
     55,
     55,
     55
   );
+
 
   doc.text(
     "Aplicación práctica: Mi Presupuesto",
@@ -1425,6 +1602,7 @@ async function createPDF() {
 
 
   y += 12;
+
 
   divider();
 
@@ -1473,6 +1651,7 @@ async function createPDF() {
         parseMoney(
           input.value
         );
+
 
       if (amount > 0) {
 
@@ -1527,7 +1706,7 @@ async function createPDF() {
 
 
 // ------------------------------------------------------
-// EGRESOS FIJOS PDF
+// EGRESOS PDF
 // ------------------------------------------------------
 
   title(
@@ -1587,10 +1766,6 @@ async function createPDF() {
 
   y += 4;
 
-
-// ------------------------------------------------------
-// EGRESOS VARIABLES PDF
-// ------------------------------------------------------
 
   subtitle(
     "Egresos variables"
@@ -1765,7 +1940,9 @@ async function createPDF() {
     "bold"
   );
 
+
   doc.setFontSize(13);
+
 
   doc.setTextColor(
     255,
@@ -1782,6 +1959,7 @@ async function createPDF() {
 
 
   doc.setFontSize(15);
+
 
   doc.setTextColor(
     255,
@@ -1810,6 +1988,7 @@ async function createPDF() {
 
 // ------------------------------------------------------
 // REFLEXIÓN PDF
+// MISMO CONTENIDO QUE EN LA WEB
 // ------------------------------------------------------
 
   title(
@@ -1817,99 +1996,23 @@ async function createPDF() {
   );
 
 
-  const marginPercentage =
-    data.netIncome > 0
-      ? (
-          data.monthlyResult /
-          data.netIncome
-        ) * 100
-      : 0;
+  paragraph(
+    reflection.title,
+    reflection.type !== "empty"
+  );
 
 
   if (
-    data.netIncome === 0
+    reflection.type !== "empty"
   ) {
 
-    paragraph(
-      "Completá tus ingresos y egresos para comenzar."
+    reflection.paragraphs.forEach(
+      text => {
+
+        paragraph(text);
+
+      }
     );
-
-  }
-
-
-  else if (
-    data.monthlyResult < 0
-  ) {
-
-    paragraph(
-      "Lo más importante ya ocurrió: ordenarte es un paso de fe.",
-      true
-    );
-
-    paragraph(
-      "Reconocer dónde estamos nos permite comenzar a tomar decisiones que nos acerquen a una administración más sabia."
-    );
-
-    paragraph(
-      "Conversalo con Dios:",
-      true
-    );
-
-    paragraph(
-      "¿Cuál es el próximo paso que puedo dar para comenzar a ordenar mis finanzas?",
-      true
-    );
-
-    paragraph(
-      "Algunas ideas:",
-      true
-    );
-
-    bullet(
-      "Identificar cuál es el gasto que hoy tiene mayor impacto."
-    );
-
-    bullet(
-      "Reducir o postergar algún gasto que no sea prioritario."
-    );
-
-    bullet(
-      "Dar un paso de fe y buscar maneras de aumentar mis ingresos: buscar un trabajo nuevo, hacer horas extras, comenzar un emprendimiento, capacitarme o explorar una nueva oportunidad."
-    );
-
-    bullet(
-      "Pedir consejo o ayuda si necesito acompañamiento para ordenar mis finanzas."
-    );
-
-  }
-
-
-  else if (
-    data.monthlyResult > 0 &&
-    marginPercentage > 5
-  ) {
-
-    paragraph(
-      "Terminaste el mes con un excedente.",
-      true
-    );
-
-    paragraph(
-      "Dios no solo nos llama a administrar con fidelidad cuando falta, sino también cuando sobra."
-    );
-
-
-    if (
-      data.savings > 0
-    ) {
-
-      paragraph(
-        `Decidiste separar ${formatMoney(
-          data.savings
-        )} para ahorro o fondo de emergencia.`
-      );
-
-    }
 
 
     paragraph(
@@ -1917,75 +2020,25 @@ async function createPDF() {
       true
     );
 
+
     paragraph(
-      "¿Cómo puedo administrar este excedente de una manera que honre a Dios?",
+      reflection.question,
       true
     );
+
 
     paragraph(
       "Algunas ideas:",
       true
     );
 
-    bullet(
-      "Ser generoso y bendecir a alguien."
-    );
 
-    bullet(
-      "Fortalecer mi ahorro o fondo de emergencia."
-    );
+    reflection.ideas.forEach(
+      idea => {
 
-    bullet(
-      "Prepararme para una necesidad o proyecto futuro."
-    );
+        bullet(idea);
 
-    bullet(
-      "Invertir con propósito, por ejemplo, campamentos, Corazón por la Misión, CA u otros proyectos."
-    );
-
-  }
-
-
-  else {
-
-    paragraph(
-      "Lograste mantener un equilibrio entre tus ingresos y tus egresos.",
-      true
-    );
-
-    paragraph(
-      "Es una buena base para seguir creciendo en una administración sabia."
-    );
-
-    paragraph(
-      "Conversalo con Dios:",
-      true
-    );
-
-    paragraph(
-      "¿Qué pequeño cambio puedo hacer para empezar a generar margen en mis finanzas?",
-      true
-    );
-
-    paragraph(
-      "Algunas ideas:",
-      true
-    );
-
-    bullet(
-      "Revisar si hay algún gasto que podría reducir."
-    );
-
-    bullet(
-      "Planificar mejor alguna compra o gasto antes de hacerlo."
-    );
-
-    bullet(
-      "Comenzar a separar una pequeña cantidad para ahorro o imprevistos."
-    );
-
-    bullet(
-      "Buscar alguna oportunidad para aumentar mis ingresos."
+      }
     );
 
   }
@@ -1996,6 +2049,7 @@ async function createPDF() {
 // ------------------------------------------------------
 
   y += 5;
+
 
   title(
     "Mi compromiso"
@@ -2036,6 +2090,7 @@ async function createPDF() {
         "img/logo-powerhouse.PNG"
       );
 
+
     const logoRaices =
       await loadImageAsDataURL(
         "img/logo-raices.PNG"
@@ -2043,12 +2098,14 @@ async function createPDF() {
 
 
     if (
-      y > 248
+      y >
+      pageHeight - 45
     ) {
 
       doc.addPage();
 
-      y = 245;
+      y =
+        pageHeight - 42;
 
     }
 
@@ -2057,7 +2114,7 @@ async function createPDF() {
       y =
         Math.max(
           y + 10,
-          245
+          pageHeight - 42
         );
 
     }
